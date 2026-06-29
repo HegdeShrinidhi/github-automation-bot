@@ -15,15 +15,21 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 ],
 
 callbacks: {
-  async jwt({ token, account }) {
+  async jwt({ token, account, profile }) {
     if (account) {
       token.accessToken = account.access_token;
+    }
+
+    if (profile) {
+      token.login = profile.login;
     }
 
     return token;
   },
 
-  async session({ session }) {
+  async session({ session, token }) {
+    session.user.username = token.login as string;
+
     return session;
   },
 },
