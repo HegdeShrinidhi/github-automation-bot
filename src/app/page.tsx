@@ -16,7 +16,7 @@ export default async function Home() {
         </h1>
 
         <p className="mb-8 text-xl text-gray-600">
-          AI-Powered GitHub Workflow Automation
+          AI-Powered GitHub Workflow Automation Platform
         </p>
 
         <div className="mb-10 grid gap-3 text-gray-700">
