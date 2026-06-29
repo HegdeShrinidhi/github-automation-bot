@@ -21,7 +21,7 @@ export default async function Home() {
 
         <div className="mb-10 grid gap-3 text-gray-700">
           <p>✅ GitHub Authentication</p>
-          <p>✅ Repository Monitoring</p>
+          <p>✅ Git-Repository Monitoring</p>
           <p>✅ Automation Rules</p>
           <p>✅ Event Tracking Dashboard</p>
         </div>
