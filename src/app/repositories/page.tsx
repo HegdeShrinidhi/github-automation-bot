@@ -2,6 +2,7 @@ import { auth } from "@/auth";
 import { redirect } from "next/navigation";
 import { getRepositories } from "@/lib/github";
 import { AppSidebar } from "@/components/layout/app-sidebar";
+import Link from "next/link";
 
 export default async function RepositoriesPage() {
   const session = await auth();
@@ -29,9 +30,11 @@ export default async function RepositoriesPage() {
               key={repo.id}
               className="rounded-lg border p-5 shadow-sm"
             >
-              <h2 className="text-xl font-semibold">
-                {repo.name}
-              </h2>
+              <Link href={`/repositories/${repo.name}`}>
+                <h2 className="text-xl font-semibold hover:text-blue-600 cursor-pointer">
+                  {repo.name}
+                </h2>
+              </Link>
 
               <p className="text-gray-500">
                 {repo.description || "No description"}

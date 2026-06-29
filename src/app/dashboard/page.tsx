@@ -1,7 +1,9 @@
 import { auth } from "@/auth";
 import { redirect } from "next/navigation";
 import { AppSidebar } from "@/components/layout/app-sidebar";
-import { StatsCard } from "@/components/dashboard/stats-card";
+import DashboardCards from "@/components/dashboard/dashboard-cards";
+import { getRepositories } from "@/lib/github";
+
 
 export default async function DashboardPage() {
   const session = await auth();
@@ -9,6 +11,10 @@ export default async function DashboardPage() {
   if (!session) {
     redirect("/login");
   }
+
+  const username = session.user?.name;
+
+  const repositories = await getRepositories(username!);
 
   return (
     <div className="flex">
@@ -23,11 +29,10 @@ export default async function DashboardPage() {
           GitHub Automation Dashboard
         </p>
 
-        <div className="grid gap-4 md:grid-cols-3">
-          <StatsCard title="Events" value="0" />
-          <StatsCard title="Repositories" value="0" />
-          <StatsCard title="Rules" value="0" />
-        </div>
+        <DashboardCards
+          repositoryCount={repositories.length}
+        />
+        
       </main>
     </div>
   );
