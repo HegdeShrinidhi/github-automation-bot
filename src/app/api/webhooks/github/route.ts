@@ -18,7 +18,6 @@ export async function POST(request: Request) {
     payload.repository?.name ||
     "github-automation-bot";
 
-  // Save event to Supabase
   const { data, error } = await supabase
     .from("events")
     .insert([
@@ -33,21 +32,32 @@ export async function POST(request: Request) {
   console.log(data);
   console.log(error);
 
-  // Send Slack notification
-  await fetch(process.env.SLACK_WEBHOOK_URL!, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      text: `🔔 GitHub Event Received
+  try {
+    const response = await fetch(
+      process.env.SLACK_WEBHOOK_URL!,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          text: `🔔 GitHub Event Received
 
 Repository: ${repository}
 Event: ${event}
 
 Status: received`,
-    }),
-  });
+        }),
+      }
+    );
+
+    const result = await response.text();
+
+    console.log("Slack status:", response.status);
+    console.log("Slack response:", result);
+  } catch (err) {
+    console.error("Slack error:", err);
+  }
 
   return NextResponse.json({
     success: true,
