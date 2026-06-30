@@ -29,37 +29,48 @@ export async function POST(request: Request) {
     ])
     .select();
 
-  console.log(data);
-  console.log(error);
+console.log(data);
+console.log(error);
 
-  try {
-    const response = await fetch(
-      process.env.SLACK_WEBHOOK_URL!,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          text: `🔔 GitHub Event Received
+console.log(
+  "Slack URL exists:",
+  !!process.env.SLACK_WEBHOOK_URL
+);
+
+try {
+  const response = await fetch(
+    process.env.SLACK_WEBHOOK_URL!,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        text: `🔔 GitHub Event Received
 
 Repository: ${repository}
 Event: ${event}
 
 Status: received`,
-        }),
-      }
-    );
+      }),
+    }
+  );
 
-    const result = await response.text();
+  console.log(
+    "Slack status:",
+    response.status
+  );
 
-    console.log("Slack status:", response.status);
-    console.log("Slack response:", result);
-  } catch (err) {
-    console.error("Slack error:", err);
+  const result = await response.text();
+
+  console.log(
+    "Slack response:",
+    result
+  );
+} catch (err) {
+  console.error(
+    "Slack error:",
+    err
+  );
   }
-
-  return NextResponse.json({
-    success: true,
-  });
 }
