@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 
 export async function GET() {
   console.log(
-    "Slack URL exists:",
+    "Slack URL:",
     !!process.env.SLACK_WEBHOOK_URL
   );
 
@@ -14,18 +14,18 @@ export async function GET() {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        text: "🚀 Slack test from GitHub Automation Bot",
+        text: "🚀 Slack direct test",
       }),
     }
   );
 
   const result = await response.text();
 
-  console.log("Slack status:", response.status);
-  console.log("Slack response:", result);
+  console.log("Status:", response.status);
+  console.log("Response:", result);
 
   return NextResponse.json({
     status: response.status,
-    response: result,
+    result,
   });
 }
