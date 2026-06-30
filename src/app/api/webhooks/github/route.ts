@@ -190,6 +190,16 @@ ${issueBody}`,
         result.choices?.[0]?.message?.content ||
         "Unable to generate AI summary.";
 
+      await supabase
+        .from("ai_summaries")
+        .insert([
+          {
+            title: issueTitle,
+            summary,
+            repository: repo,
+          },
+        ]);
+
       console.log(
         "Summary:",
         summary
