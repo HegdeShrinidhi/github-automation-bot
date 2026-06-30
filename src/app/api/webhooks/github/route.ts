@@ -33,12 +33,9 @@ export async function POST(request: Request) {
   console.log("Data:", data);
   console.log("Error:", error);
 
-  // Slack notification
-  console.log(
-    "Slack URL exists:",
-    !!process.env.SLACK_WEBHOOK_URL
-  );
-
+  // -----------------------------
+  // Slack Notification
+  // -----------------------------
   try {
     const response = await fetch(
       process.env.SLACK_WEBHOOK_URL!,
@@ -76,7 +73,9 @@ Status: received`,
     );
   }
 
-  // GitHub PR comment
+  // -----------------------------
+  // Pull Request Comment
+  // -----------------------------
   if (
     event === "pull_request" &&
     payload.action === "opened"
@@ -121,83 +120,109 @@ Slack notification sent successfully.`,
       );
     }
   }
+
+  // -----------------------------
+  // AI Summary for Issues
+  // -----------------------------
   if (
-  event === "issues" &&
-  payload.action === "opened"
-) {
-  try {
-    const owner =
-      payload.repository.owner.login;
+    event === "issues" &&
+    payload.action === "opened"
+  ) {
+    try {
+      console.log("Issue event received");
 
-    const repo =
-      payload.repository.name;
+      const owner =
+        payload.repository.owner.login;
 
-    const issueNumber =
-      payload.issue.number;
+      const repo =
+        payload.repository.name;
 
-    const issueTitle =
-      payload.issue.title || "";
+      const issueNumber =
+        payload.issue.number;
 
-    const issueBody =
-      payload.issue.body || "";
+      const issueTitle =
+        payload.issue.title || "";
 
-    const aiResponse = await fetch(
-      "https://api.openai.com/v1/chat/completions",
-      {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          model: "gpt-4o-mini",
-          messages: [
-            {
-              role: "user",
-              content: `Summarize this GitHub issue.
+      const issueBody =
+        payload.issue.body || "";
 
-Title:
+      console.log("Issue title:", issueTitle);
+      console.log("Issue body:", issueBody);
+
+      const aiResponse = await fetch(
+        "https://api.openai.com/v1/chat/completions",
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            model: "gpt-4o-mini",
+            messages: [
+              {
+                role: "system",
+                content:
+                  "You are a GitHub issue summarizer. Generate a short technical summary.",
+              },
+              {
+                role: "user",
+                content: `Title:
 ${issueTitle}
 
 Description:
 ${issueBody}`,
-            },
-          ],
-        }),
-      }
-    );
+              },
+            ],
+          }),
+        }
+      );
 
-    const result =
-      await aiResponse.json();
+      const result =
+        await aiResponse.json();
 
-    const summary =
-      result.choices?.[0]?.message?.content;
+      console.log(
+        "OpenAI response:",
+        result
+      );
 
-    await fetch(
-      `https://api.github.com/repos/${owner}/${repo}/issues/${issueNumber}/comments`,
-      {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${process.env.GITHUB_TOKEN}`,
-          Accept: "application/vnd.github+json",
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          body: `🧠 AI Summary
+      const summary =
+        result.choices?.[0]?.message?.content ||
+        "Unable to generate AI summary.";
+
+      console.log(
+        "Summary:",
+        summary
+      );
+
+      const githubResponse = await fetch(
+        `https://api.github.com/repos/${owner}/${repo}/issues/${issueNumber}/comments`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${process.env.GITHUB_TOKEN}`,
+            Accept: "application/vnd.github+json",
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            body: `🧠 AI Summary
 
 ${summary}`,
-        }),
-      }
-    );
+          }),
+        }
+      );
 
-    console.log("AI summary posted.");
-  } catch (err) {
-    console.error(
-      "AI summary error:",
-      err
-    );
+      console.log(
+        "AI comment status:",
+        githubResponse.status
+      );
+    } catch (err) {
+      console.error(
+        "AI summary error:",
+        err
+      );
+    }
   }
-}
 
   return NextResponse.json({
     success: true,
