@@ -9,6 +9,7 @@ import {
   GitBranch,
 } from "lucide-react";
 import LogoutButton from "./logout-button";
+import { Brain } from "lucide-react";
 
 export function AppSidebar() {
   return (
@@ -49,6 +50,13 @@ export function AppSidebar() {
           >
             <BellRing size={18} />
             Events
+          </Link>
+          <Link
+            href="/ai-summaries"
+            className="flex items-center gap-2 hover:text-blue-500"
+          >
+            <Brain size={18} />
+            AI Summaries
           </Link>
 
           <Link
