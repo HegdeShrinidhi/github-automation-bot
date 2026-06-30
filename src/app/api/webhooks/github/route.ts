@@ -121,6 +121,83 @@ Slack notification sent successfully.`,
       );
     }
   }
+  if (
+  event === "issues" &&
+  payload.action === "opened"
+) {
+  try {
+    const owner =
+      payload.repository.owner.login;
+
+    const repo =
+      payload.repository.name;
+
+    const issueNumber =
+      payload.issue.number;
+
+    const issueTitle =
+      payload.issue.title || "";
+
+    const issueBody =
+      payload.issue.body || "";
+
+    const aiResponse = await fetch(
+      "https://api.openai.com/v1/chat/completions",
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          model: "gpt-4o-mini",
+          messages: [
+            {
+              role: "user",
+              content: `Summarize this GitHub issue.
+
+Title:
+${issueTitle}
+
+Description:
+${issueBody}`,
+            },
+          ],
+        }),
+      }
+    );
+
+    const result =
+      await aiResponse.json();
+
+    const summary =
+      result.choices?.[0]?.message?.content;
+
+    await fetch(
+      `https://api.github.com/repos/${owner}/${repo}/issues/${issueNumber}/comments`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${process.env.GITHUB_TOKEN}`,
+          Accept: "application/vnd.github+json",
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          body: `🧠 AI Summary
+
+${summary}`,
+        }),
+      }
+    );
+
+    console.log("AI summary posted.");
+  } catch (err) {
+    console.error(
+      "AI summary error:",
+      err
+    );
+  }
+}
 
   return NextResponse.json({
     success: true,
