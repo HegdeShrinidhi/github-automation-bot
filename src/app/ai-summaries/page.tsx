@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { AppSidebar } from "@/components/layout/app-sidebar";
 
 interface AISummary {
   id: number;
@@ -25,50 +26,48 @@ export default function AISummariesPage() {
       });
   }, []);
 
-  if (loading) {
-    return (
-      <div className="p-6">
-        Loading AI summaries...
-      </div>
-    );
-  }
-
   return (
-    <div className="space-y-6 p-6">
-      <h1 className="text-3xl font-bold">
-        🧠 AI Summaries
-      </h1>
+    <div className="flex">
+      <AppSidebar />
 
-      {summaries.length === 0 ? (
-        <div className="border rounded-lg p-6">
-          No AI summaries yet.
-        </div>
-      ) : (
-        summaries.map((item) => (
-          <div
-            key={item.id}
-            className="border rounded-xl p-6 shadow-sm"
-          >
-            <h2 className="text-xl font-semibold">
-              {item.title}
-            </h2>
+      <main className="flex-1 p-8 space-y-6">
+        <h1 className="text-4xl font-bold">
+          🧠 AI Summaries
+        </h1>
 
-            <p className="mt-4 text-gray-600">
-              {item.summary}
-            </p>
-
-            <div className="mt-4 text-sm text-gray-500">
-              Repository: {item.repository}
-            </div>
-
-            <div className="text-sm text-gray-500">
-              {new Date(
-                item.created_at
-              ).toLocaleString()}
-            </div>
+        {loading ? (
+          <p>Loading...</p>
+        ) : summaries.length === 0 ? (
+          <div className="border rounded-lg p-6">
+            No AI summaries yet.
           </div>
-        ))
-      )}
+        ) : (
+          summaries.map((item) => (
+            <div
+              key={item.id}
+              className="border rounded-xl p-6 shadow"
+            >
+              <h2 className="text-xl font-semibold">
+                {item.title}
+              </h2>
+
+              <p className="mt-4 text-gray-600">
+                {item.summary}
+              </p>
+
+              <p className="mt-4 text-sm text-gray-500">
+                Repository: {item.repository}
+              </p>
+
+              <p className="text-sm text-gray-500">
+                {new Date(
+                  item.created_at
+                ).toLocaleString()}
+              </p>
+            </div>
+          ))
+        )}
+      </main>
     </div>
   );
 }
